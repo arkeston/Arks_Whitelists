@@ -606,7 +606,7 @@ def main():
         print("No further global duplicates found.")
 
     print("\n--- Saving Final Profiles to File ---")
-    output_filename = 'final_subscriptions.txt'
+    output_filename = 'merged_sub.txt'
     try:
         with open(output_filename, 'w', encoding='utf-8') as f:
             for profile_wrapper in final_deduplicated_profiles:
