@@ -33,10 +33,11 @@ def parse_wireguard_conf(conf_str: str, name: str) -> Optional[Dict[str, Any]]:
         }
     return None
 
+
 def extract_outbounds_from_config(json_str: str) -> List[Dict[str, Any]]:
     """
     Placeholder for extracting outbounds from a JSON configuration (e.g., sing-box).
-    ""
+    """
     try:
         config = json.loads(json_str)
         outbounds = []
@@ -55,6 +56,7 @@ def extract_outbounds_from_config(json_str: str) -> List[Dict[str, Any]]:
     except json.JSONDecodeError:
         print("[Placeholder] Invalid JSON for outbound extraction.")
     return []
+
 
 def parse_link(link: str) -> Optional[Dict[str, Any]]:
     """
@@ -163,6 +165,7 @@ def extract_links(text: str) -> List[str]:
     """
     return [line.strip() for line in text.splitlines() if '://' in line.strip()]
 
+
 def decode_subscription(raw: str) -> Dict[str, Any]:
     """
     Decodes a subscription string, handling plain text, single base64, and double base64.
@@ -196,11 +199,12 @@ def decode_subscription(raw: str) -> Dict[str, Any]:
     # If no base64 decoding worked, return raw
     return {'links': extract_links(raw), 'decoded': raw, 'doubleEncoded': False}
 
+
 def parse_sn_link_async(url_str: str) -> Optional[Dict[str, Any]]:
     """
     Parses sn:// protocol links, including base64 decoding, decompression, and string extraction.
     Translated from JS `parseSNLinkAsync`.
-    ""
+    """
     try:
         without_proto = url_str[5:] if url_str.startswith('sn://') else url_str
 
@@ -316,6 +320,7 @@ def parse_sn_link_async(url_str: str) -> Optional[Dict[str, Any]]:
                             pass
 
         if not server or not uuid: # Basic check for valid outbound
+            # Corrected f-string usage
             print(f"[parse_sn_link_async] Could not determine server ({server}) or uuid ({uuid}).")
             return None
 
@@ -345,6 +350,7 @@ def parse_sn_link_async(url_str: str) -> Optional[Dict[str, Any]]:
     except Exception as e:
         print(f'sn:// parse error: {e}')
     return None
+
 
 def deduplicate_and_tag(outbounds: List[Dict[str, Any]], dedup_enabled: bool = True) -> List[Dict[str, Any]]:
     """
