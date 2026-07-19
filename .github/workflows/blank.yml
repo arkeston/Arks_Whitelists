@@ -1,37 +1,36 @@
 name: Merge Subscriptions
-permissions:
-  contents: write
-  
+
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Запускать каждые 6 часов (настрой под себя)
-  workflow_dispatch:     # Позволяет запустить вручную из интерфейса
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   merge-subs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'  # Проверь, какая версия нужна твоему скрипту
+          python-version: '3.11'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          # Если у скрипта есть зависимости (например, `requests`), создай requirements.txt и раскомментируй:
-          # pip install -r requirements.txt
+      # Если нужны зависимости (requests и т.д.) — раскомментируй:
+      # - name: Install dependencies
+      #   run: pip install -r requirements.txt
 
-      - name: Run the script
+      - name: Run merge script
+        # УКАЖИ ЗДЕСЬ ТОЧНОЕ ИМЯ ФАЙЛА ИЗ РЕПО
         run: python merge.py
 
-      - name: Commit and push result
-        run: |
-          git config --global user.email "arkeston@mail.ru"
-          git config --global user.name "arkeston"
-          git add merged_sub.txt
-          git commit -m "Update merged subscriptions"
-          git push
+      - name: Auto-commit and push result
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Update merged subscriptions [skip ci]"
+          branch: main
+          file_pattern: merged_sub.txt
