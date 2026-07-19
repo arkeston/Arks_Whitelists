@@ -5,8 +5,10 @@ import json
 import zlib
 import gzip
 import struct
-import httpx
+import urllib.request, urllib.error # Replaced httpx with urllib.request and urllib.error
 from typing import List, Dict, Any, Optional
+
+# --- Placeholder/Helper Functions (to be implemented by the user) ---
 
 def parse_wireguard_conf(conf_str: str, name: str) -> Optional[Dict[str, Any]]:
     """
@@ -34,7 +36,7 @@ def parse_wireguard_conf(conf_str: str, name: str) -> Optional[Dict[str, Any]]:
 def extract_outbounds_from_config(json_str: str) -> List[Dict[str, Any]]:
     """
     Placeholder for extracting outbounds from a JSON configuration (e.g., sing-box).
-    """
+    ""
     try:
         config = json.loads(json_str)
         outbounds = []
@@ -198,7 +200,7 @@ def parse_sn_link_async(url_str: str) -> Optional[Dict[str, Any]]:
     """
     Parses sn:// protocol links, including base64 decoding, decompression, and string extraction.
     Translated from JS `parseSNLinkAsync`.
-    """
+    ""
     try:
         without_proto = url_str[5:] if url_str.startswith('sn://') else url_str
 
@@ -429,20 +431,19 @@ def load_profiles(input_data: str, dedup_enabled: bool = True) -> List[Dict[str,
     if input_data.startswith('http'):
         print('Loading subscription from URL...')
         try:
-            with httpx.Client(timeout=30) as client:
-                res = client.get(input_data)
-                res.raise_for_status() # Raise an exception for HTTP errors
-                text = res.text
+            # Replaced httpx.Client with urllib.request.urlopen
+            with urllib.request.urlopen(input_data, timeout=30) as response:
+                text = response.read().decode('utf-8') # Read and decode content
                 print(f'Received data ({len(text)/1024:.2f}kb). Decoding...')
                 result = decode_subscription(text)
                 links = result['links']
                 if result['doubleEncoded']:
                     print('Detected double base64, decoded.')
-        except httpx.HTTPStatusError as e:
-            print(f'HTTP error loading subscription: {e.response.status_code} - {e.response.text}')
+        except urllib.error.HTTPError as e:
+            print(f'HTTP error loading subscription: {e.code} - {e.reason}')
             return []
-        except httpx.RequestError as e:
-            print(f'Network error loading subscription: {e}')
+        except urllib.error.URLError as e:
+            print(f'Network error loading subscription: {e.reason}')
             return []
         except Exception as e:
             print(f'Error loading subscription: {e}')
@@ -545,29 +546,30 @@ def main():
     subscription_urls = [
         "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-all.txt",
         "https://raw.githubusercontent.com/zieng2/wl/refs/heads/main/vless_universal.txt",
+        "http://invalid.url/test.txt", # An example of an invalid URL
     ]
 
     validated_urls = []
     print("--- Validating Subscription URLs ---")
-    with httpx.Client(timeout=10) as client:
-        for url in subscription_urls:
-            try:
-                print(f"Checking URL: {url}...")
-                # Use HEAD request to check if URL is accessible without downloading content
-                response = client.head(url, follow_redirects=True)
-                response.raise_for_status() # Raise an exception for HTTP errors (4xx or 5xx)
-                if response.status_code == 200: # Ensure it's a success status
+    # Replaced httpx.Client with urllib.request.urlopen
+    for url in subscription_urls:
+        try:
+            print(f"Checking URL: {url}...")
+            # Use HEAD request to check if URL is accessible without downloading content
+            req = urllib.request.Request(url, method='HEAD') # Create a Request object for HEAD
+            with urllib.request.urlopen(req, timeout=10) as response:
+                if response.status == 200: # Check status
                     validated_urls.append(url)
                     print(f"  ✓ Valid URL: {url}")
                 else:
-                    print(f"  ✗ Invalid URL (Status {response.status_code}): {url}")
-            except httpx.RequestError as e:
-                print(f"  ✗ Network error for {url}: {e}")
-            except httpx.HTTPStatusError as e:
-                print(f"  ✗ HTTP error for {url}: Status {e.response.status_code}")
-            except Exception as e:
-                print(f"  ✗ An unexpected error occurred for {url}: {e}")
-    
+                    print(f"  ✗ Invalid URL (Status {response.status}): {url}")
+        except urllib.error.HTTPError as e:
+            print(f"  ✗ HTTP error for {url}: Status {e.code}") # Access status code
+        except urllib.error.URLError as e:
+            print(f"  ✗ Network error for {url}: {e.reason}") # Access reason for URL error
+        except Exception as e:
+            print(f"  ✗ An unexpected error occurred for {url}: {e}")
+
     if not validated_urls:
         print("No valid subscription URLs found to process. Exiting.")
         return
