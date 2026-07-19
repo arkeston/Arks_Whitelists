@@ -30,8 +30,8 @@ jobs:
 
       - name: Commit and push result
         run: |
-          git config --global user.email "your-email@example.com"
-          git config --global user.name "Your Name"
+          git config --global user.email "arkeston@mail.ru"
+          git config --global user.name "arkeston"
           git add merged_sub.txt
           git commit -m "Update merged subscriptions"
           git push
