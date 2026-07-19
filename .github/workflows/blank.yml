@@ -1,34 +1,32 @@
-name: Merge Subscriptions
+name: Merge Sing-Box Subscriptions
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
-  workflow_dispatch:
+    - cron: '0 */6 * * *'      # Запуск каждые 6 часов
+  workflow_dispatch:          # Кнопка ручного запуска в Actions
 
 permissions:
-  contents: write
+  contents: write             # Разрешаем писать в репозиторий
 
 jobs:
   merge-subs:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # Если нужны зависимости (requests и т.д.) — раскомментируй:
-      # - name: Install dependencies
-      #   run: pip install -r requirements.txt
+      # Зависимостей нет — этот шаг пропускаем
 
       - name: Run merge script
-        # УКАЖИ ЗДЕСЬ ТОЧНОЕ ИМЯ ФАЙЛА ИЗ РЕПО
+        # Убедись, что имя файла точно совпадает с тем, что в репо
         run: python merge.py
 
-      - name: Auto-commit and push result
+      - name: Auto-commit result
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Update merged subscriptions [skip ci]"
