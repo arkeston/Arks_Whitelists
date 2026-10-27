@@ -551,8 +551,10 @@ def main():
     # List of URLs to process
     subscription_urls = [
         "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/WHITE-CIDR-RU-all.txt",
+        "https://raw.githubusercontent.com/cheesyx-rudy/AeryxVPN/refs/heads/main/AeryxVPN",
         "https://raw.githubusercontent.com/zieng2/wl/refs/heads/main/vless_universal.txt",
-        "http://invalid.url/test.txt", # An example of an invalid URL
+        "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS.txt",
+        "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/BLACK_VLESS_RUS_mobile.txt",
     ]
 
     validated_urls = []
